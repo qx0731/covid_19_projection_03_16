@@ -1,8 +1,8 @@
 # read in the data from Korean, Italy and USA
 library(dplyr)
-setwd("~/Desktop/covid19-in-usa")
+setwd("~/Desktop/covid19-in-usa/covid_19_projection_03_16/code")
 graphics.off()
-k_data = read.csv('korean_time.csv')
+k_data = read.csv('../data/K_time.csv')
 k_daily = k_data %>%
   group_by(date) %>%
   summarise(test_daily = sum(test), pos_daily = sum(confirmed),
@@ -29,7 +29,7 @@ title("Korea: Time Series(total tested, positive case, released, deceased)
 
 
 # gathere italy data
-i_data = read.csv('covid19_italy_region.csv')
+i_data = read.csv('../data/covid19_italy_region.csv')
 i_data$date = i_data$Date
 i_daily = i_data %>%
   group_by(date) %>%
@@ -56,7 +56,7 @@ title("Italy: Time Series(total tested, positive case, released, deceased)
       from 2020-02-24 to 2020-03-16", line = -23, outer = TRUE)
 
 # gathere Us data
-u_data = read.csv('us_states_covid19_daily.csv')
+u_data = read.csv('../data/us_states_covid19_daily.csv')
 u_data$tested = u_data$positive + u_data$negative
 u_daily = u_data %>%
   group_by(date) %>%
@@ -106,12 +106,17 @@ plot(x3, xlim = c(0, 60), ylim = c(1,2.2), xaxt="n", type = 'l', xlab ='Date', y
 axis(side = 1, at = seq(1, length(x3)), labels = u_daily$date[2:length(u_daily$date)])
 
 quartz()
+ccf(x1, x3, lag.max = 10, plot = TRUE)
+quartz()
 ccf(x1[31:52], x3, lag.max = 10, plot = TRUE)
+quartz()
 ccf(x2, x3, lag.max = 5, plot = TRUE)
+
 
 # Run US positive case from Italy 
 projected = u_daily$pos_daily[length(u_daily$pos_daily)] * cumprod(x2[(length(u_daily$pos_daily)):length(x2)])
 i_project = c(u_daily$pos_daily, projected)
+write.csv(i_project, file = 'i.csv')
 
 quartz()
 plot(i_project,xlim = c(0, 30), xaxt="n", type = 'l', xlab ='Date', ylab = 'Daily change ratio' )
@@ -121,10 +126,15 @@ axis(side = 1, at = seq(1, length(i_project)), labels = i_daily$date+8)
 x1_temp = x1[31:52]
 projected = u_daily$pos_daily[length(u_daily$pos_daily)] * cumprod(x1_temp[(length(u_daily$pos_daily)):length(x1_temp)])
 k_project = c(u_daily$pos_daily, projected)
+write.csv(k_project, file = 'k.csv')
 
 quartz()
 plot(i_project,xlim = c(0, 30), xaxt="n", type = 'l', xlab ='Date', ylab = 'Daily change ratio' )
 axis(side = 1, at = seq(1, length(i_project)), labels = i_daily$date+8)
 
 
+# add in pure exponential increase 
+# log(case) = a + b*t
 
+y = u_daily$pos_daily
+t = seq(1, length(u_daily$pos_daily))
