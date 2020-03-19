@@ -135,6 +135,8 @@ axis(side = 1, at = seq(1, length(i_project)), labels = i_daily$date+8)
 
 # add in pure exponential increase 
 # log(case) = a + b*t
-
-y = u_daily$pos_daily
-t = seq(1, length(u_daily$pos_daily))
+us_time_case = data.frame(log(u_daily$pos_daily), seq(1, length(u_daily$pos_daily)))
+colnames(us_time_case) = c('log_case', 'days')
+t_frct = data.frame(days=seq(length(u_daily$pos_daily)+1, length(u_daily$pos_daily)+10))
+crazy_model = lm(log_case~days, data = us_time_case)
+write.csv(exp(predict(crazy_model, t_frct)), file = 'crazy.csv')
