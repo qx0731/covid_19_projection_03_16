@@ -56,7 +56,7 @@ title("Italy: Time Series(total tested, positive case, released, deceased)
       from 2020-02-24 to 2020-03-16", line = -23, outer = TRUE)
 
 # gathere Us data
-u_data = read.csv('../data/us_states_covid19_daily.csv')
+u_data = read.csv('../data/us_covid19_daily.csv')
 u_data$tested = u_data$positive + u_data$negative
 u_daily = u_data %>%
   group_by(date) %>%
@@ -108,7 +108,7 @@ axis(side = 1, at = seq(1, length(x3)), labels = u_daily$date[2:length(u_daily$d
 quartz()
 ccf(x1, x3, lag.max = 10, plot = TRUE)
 quartz()
-ccf(x1[31:52], x3, lag.max = 10, plot = TRUE)
+ccf(x1[31:length(x1)], x3, lag.max = 10, plot = TRUE)
 quartz()
 ccf(x2, x3, lag.max = 5, plot = TRUE)
 
@@ -123,7 +123,7 @@ plot(i_project,xlim = c(0, 30), xaxt="n", type = 'l', xlab ='Date', ylab = 'Dail
 axis(side = 1, at = seq(1, length(i_project)), labels = i_daily$date+8)
 
 
-x1_temp = x1[31:52]
+x1_temp = x1[31:length(x1)]
 projected = u_daily$pos_daily[length(u_daily$pos_daily)] * cumprod(x1_temp[(length(u_daily$pos_daily)):length(x1_temp)])
 k_project = c(u_daily$pos_daily, projected)
 write.csv(k_project, file = 'k.csv')
@@ -139,4 +139,4 @@ us_time_case = data.frame(log(u_daily$pos_daily), seq(1, length(u_daily$pos_dail
 colnames(us_time_case) = c('log_case', 'days')
 t_frct = data.frame(days=seq(length(u_daily$pos_daily)+1, length(u_daily$pos_daily)+10))
 crazy_model = lm(log_case~days, data = us_time_case)
-write.csv(exp(predict(crazy_model, t_frct)), file = 'crazy.csv')
+write.csv(c(u_daily$pos_daily, exp(predict(crazy_model, t_frct))), file = 'crazy.csv')
